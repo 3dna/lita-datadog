@@ -9,7 +9,7 @@ module Lita
         return_code, contents = client.mute_host(hostname, args)
 
         if return_code.to_s != '200'
-          log.warning("URL (#{return_code}): #{contents['errors'].join('\n')}")
+          log.warn("URL (#{return_code}): #{contents['errors'].join('\n')}")
           return false
         end
 
@@ -23,7 +23,7 @@ module Lita
         return_code, contents = client.unmute_host(hostname)
 
         if return_code.to_s != '200'
-          log.warning("URL (#{return_code}): #{contents['errors'].join('\n')}")
+          log.warn("URL (#{return_code}): #{contents['errors'].join('\n')}")
           return false
         end
 
@@ -39,7 +39,7 @@ module Lita
                                                       end_ts, event_query)
 
         if return_code.to_s != '200'
-          log.warning("URL (#{return_code}): #{contents['errors'].join('\n')}")
+          log.warn("URL (#{return_code}): #{contents['errors'].join('\n')}")
           return nil
         end
 
@@ -55,22 +55,26 @@ module Lita
       end
 
       def parse_end(string)
-        found = /(to|end):["“](.+?)["”]/.match(string)
+        string.gsub!(/[”“]/, '"')
+        found = /(to|end):"(.+?)"/.match(string)
         found ? Chronic.parse(found[2]).to_i : Time.now.to_i
       end
 
       def parse_start(string, end_ts)
-        found = /(from|start):["“](.+?)["”]/.match(string)
+        string.gsub!(/[”“]/, '"')
+        found = /(from|start):"(.+?)"/.match(string)
         found ? Chronic.parse(found[2]).to_i : end_ts - config.timerange
       end
 
       def parse_metric(string)
-        found = /metric:["“](.+?)["”]/.match(string)
+        string.gsub!(/[”“]/, '"')
+        found = /metric:"(.+?)"/.match(string)
         found ? found[1] : 'system.load.1{*}'
       end
 
       def parse_event(string)
-        found = /event:["“](.+?)["”]/.match(string)
+        string.gsub!(/[”“]/, '"')
+        found = /event:"(.+?)"/.match(string)
         found ? found[1] : ''
       end
     end
